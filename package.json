@@ -1,0 +1,30 @@
+{
+  "name": "firebase-rtdb-types",
+  "version": "1.0.0",
+  "description": "Typescript type definitions for the Firebase real-time database which are more precise than standard.",
+  "main": "index.ts",
+  "author": "Rob Rendell <rob.rendell.au@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "npm": "please-use-yarn",
+    "yarn": ">=1.22.21 <2.0.0",
+    "node": ">=20.18.0 <21.0.0"
+  },
+  "workspaces": [
+    "packages/common",
+    "packages/client",
+    "packages/server"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build"
+  },
+  "devDependencies": {
+    "eslint": "^9.22.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "firebase": "^11.7.1",
+    "firebase-admin": "^13.3.0",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.3"
+  }
+}

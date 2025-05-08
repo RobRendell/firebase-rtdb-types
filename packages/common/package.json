@@ -1,0 +1,11 @@
+{
+  "name": "@firebase-rtdb-types/common",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build && tsc-alias"
+  }
+}

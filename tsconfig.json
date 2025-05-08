@@ -1,0 +1,34 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/common/tsconfig.json"},
+    { "path": "./packages/client/tsconfig.json"},
+    { "path": "./packages/server/tsconfig.json"}
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "moduleResolution": "Node",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "composite": true,
+    "declarationMap": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": false
+  }
+}
