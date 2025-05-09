@@ -1,15 +1,20 @@
 {
-  "name": "@firebase-rtdb-types/server",
+  "name": "better-firebase-rtdb-types-server",
   "version": "1.0.0",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "description": "Defines strong types for the server-side Firebase real-time database (RTDB) accessor functions.",
+  "author": "Rob Rendell",
+  "repository": "https://github.com/RobRendell/firebase-rtdb-types.git",
   "license": "MIT",
+  "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc --build && tsc-alias"
   },
-  "devDependencies": {
-    "@firebase-rtdb-types/common": "*"
+  "dependencies": {
+    "better-firebase-rtdb-types-common": "*"
   },
   "peerDependencies": {
-    "firebase-admin": "^13.3.0"
+    "firebase-admin": "^13.0.0"
   }
 }

@@ -1,17 +1,25 @@
 import type {TransactionResult} from '@firebase/database-types';
-import type {ChildOfDynamicStringKey, ParentPath, TypeOfPathField} from '@firebase-rtdb-types/common';
+import type {ChildOfDynamicStringKey, ParentPath, TypeOfPathField} from 'better-firebase-rtdb-types-common';
 import type {database} from 'firebase-admin';
 
-export interface TypedDataSnapshot<Base, Path extends string, Exists extends boolean = boolean> extends database.DataSnapshot {
+type ValidChildPath<Base, Path extends string, ChildPath extends string> =
+    TypeOfPathField<Base, `${Path}/${ChildPath}`> extends void ? never : ChildPath;
+
+export interface TypedDataSnapshot<Base, Path extends string> extends database.DataSnapshot {
     /** This field doesn't exist, but can be of use to users to inspect types in their IDEs. */
     readonly __type?: TypeOfPathField<Base, Path>;
-    child<ChildPath extends string>(path: ChildPath): TypedDataSnapshot<Base, `${Path}/${ChildPath}`>;
-    forEach(action: (a: TypedDataSnapshot<Base, `${Path}/*`, true>) => boolean | void): boolean;
+    child<ChildPath extends string>(path: ValidChildPath<Base, Path, ChildPath>): TypedDataSnapshot<Base, `${Path}/${ChildPath}`>;
+    forEach(action: (a: TypedExistingDataSnapshot<Base, `${Path}/*`>) => boolean | void): boolean;
     ref: TypedReference<Base, Path>;
-    exists(this: TypedDataSnapshot<Base, Path, Exists>): this is TypedDataSnapshot<Base, Path, true>;
-    val(): Exists extends true ? TypeOfPathField<Base, Path> : Exists extends false ? null : TypeOfPathField<Base, Path> | null;
+    exists(this: TypedDataSnapshot<Base, Path>): this is TypedExistingDataSnapshot<Base, Path>;
+    val(): TypeOfPathField<Base, Path> | null;
 
-    key: Exists extends true ? string : Exists extends false ? null : string | null;
+    key: string | null;
+}
+
+export interface TypedExistingDataSnapshot<Base, Path extends string> extends TypedDataSnapshot<Base, Path> {
+    val(): TypeOfPathField<Base, Path>;
+    key: string;
 }
 
 export type TypedThenableReference<Base, Path extends string, S = never> = TypedReference<Base, Path, S> &
@@ -26,11 +34,11 @@ type ValueCallback<Base, Path extends string> =
 
 type EventTypeChildRemoved = 'child_removed';
 type ChildRemovedCallback<Base, Path extends string> =
-    (childSnapshot: TypedDataSnapshot<Base, `${Path}/*`, true>) => unknown;
+    (childSnapshot: TypedExistingDataSnapshot<Base, `${Path}/*`>) => unknown;
 
 type EventTypeChildOther = 'child_added' | 'child_changed' | 'child_moved';
 type ChildEventCallbackWithPrevKey<Base, Path extends string> =
-    (childSnapshot: TypedDataSnapshot<Base, `${Path}/*`, true>, previousChildKey: string | null) => unknown;
+    (childSnapshot: TypedExistingDataSnapshot<Base, `${Path}/*`>, previousChildKey: string | null) => unknown;
 
 /**
  * As well as the base type `Base` and the current path `Path`, a TypedQuery can have an "active search type" S, which
@@ -88,7 +96,7 @@ export interface TypedQuery<Base, Path extends string, S = never> extends databa
         context?: object | null
     ): Promise<TypedDataSnapshot<Base, `${Path}/*`>>;
 
-    orderByChild<ChildPath extends string>(path: ChildPath): TypedQuery<Base, Path, TypeOfPathField<Base, `${Path}/*/${ChildPath}`>>;
+    orderByChild<ChildPath extends string>(path: ValidChildPath<Base, `${Path}/*`, ChildPath>): TypedQuery<Base, Path, TypeOfPathField<Base, `${Path}/*/${ChildPath}`>>;
     orderByKey(): TypedQuery<Base, Path, string>;
     orderByPriority(): TypedQuery<Base, Path, string | number | null>;
     orderByValue(): TypedQuery<Base, Path, TypeOfPathField<Base, Path>>;
@@ -110,7 +118,7 @@ interface TypedTransactionResult<Base, Path extends string> extends TransactionR
 export interface TypedReference<Base, Path extends string, S = never> extends Omit<database.Reference, keyof database.Query>, TypedQuery<Base, Path, S> {
     root: TypedReference<Base, ''>;
     parent: TypedReference<Base, ParentPath<Path>>;
-    child<ChildPath extends string>(path: ChildPath): TypedReference<Base, `${Path}/${ChildPath}`>;
+    child<ChildPath extends string>(path: ValidChildPath<Base, Path, ChildPath>): TypedReference<Base, `${Path}/${ChildPath}`>;
     push(
         value?: ChildOfDynamicStringKey<TypeOfPathField<Base, Path>>,
         onComplete?: (a: Error | null) => void
@@ -121,7 +129,7 @@ export interface TypedReference<Base, Path extends string, S = never> extends Om
         newPriority: string | number | null,
         onComplete?: (a: Error | null) => void
     ): Promise<void>;
-    // The base definition of database.Reference.update has values being of type `Object`, so we need to use an
+    // The base definition of database.Reference.update declares `values` to be of type `Object`, so we need to use an
     // intersection type for the `values` parameter below to declare it as both an object and a Partial<T>.
     update(
         values: TypeOfPathField<Base, Path> extends object ? (object & Partial<TypeOfPathField<Base, Path>>) : never,
@@ -130,10 +138,10 @@ export interface TypedReference<Base, Path extends string, S = never> extends Om
     transaction(
         transactionUpdate: (currentData: TypeOfPathField<Base, Path> | null) => TypeOfPathField<Base, Path> | null | undefined,
         onComplete?: (error: Error | null, committed: boolean, snapshot: TypedDataSnapshot<Base, Path> | null) => unknown,
-        applyLocally?: boolean // Optional argument
+        applyLocally?: boolean
     ): Promise<TypedTransactionResult<Base, Path>>;
 }
 
 export interface TypedDatabase<Base> extends database.Database {
-    ref<ChildPath extends string>(path: ChildPath): TypedReference<Base, ChildPath>;
+    ref<ChildPath extends string>(path: ValidChildPath<Base, '', ChildPath>): TypedReference<Base, ChildPath>;
 }

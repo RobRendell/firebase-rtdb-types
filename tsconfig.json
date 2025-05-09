@@ -16,7 +16,6 @@
     "moduleDetection": "force",
     "moduleResolution": "Node",
     "declaration": true,
-    "emitDeclarationOnly": true,
     "composite": true,
     "declarationMap": true,
 

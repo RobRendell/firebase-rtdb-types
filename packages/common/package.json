@@ -1,5 +1,5 @@
 {
-  "name": "@firebase-rtdb-types/common",
+  "name": "better-firebase-rtdb-types-common",
   "private": true,
   "version": "1.0.0",
   "license": "MIT",

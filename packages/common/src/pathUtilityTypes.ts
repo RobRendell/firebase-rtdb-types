@@ -1,24 +1,36 @@
 /**
+ * If Key is the string '*', return the value addressed by T[string] or T[number] (including Arrays or ReadonlyArrays).
  * If Key is a key of T, return T[Key], else void (handles the special case where Javascript implicitly converts numbers
  * to strings, see first paragraph of:
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Property_Accessors#property_names)
  */
-export type TypeOfStringOrNumberField<T, Key> = Key extends keyof T
-    ? Required<T>[Key]
-    : Key extends `${number}`
-        ? T extends {[key: number]: unknown}
-            ? Required<T>[number]
-            : void
-        : void;
+type TypeOfStringOrNumberField<T, Key> = Key extends '*'
+    ? T extends ReadonlyArray<infer U>
+        ? U
+        : T extends Array<infer U>
+            ? U
+            : string extends keyof T
+                ? T[string]
+                : number extends keyof T
+                    ? T[number]
+                    : never
+    : Key extends keyof T
+        ? Required<T>[Key]
+        : Key extends `${number}`
+            ? T extends {[key: number]: unknown}
+                ? Required<T>[number]
+                : void
+            : void;
 
 /**
- * Drills down into a type, treating Key as a slash separated list of keys (it also strips any leading slashes). If the
- * given path is invalid, resolves to void.
+ * Strips off any leading slash, then drills down into a type, treating Key as a slash separated list of keys or
+ * wildcard characters (which represent unbound string or number keys in the type) and resolving to the resulting type.
+ * If the given path is invalid, resolves to void.
  *
  * Example: `TypeOfPathField<{a: {b: number}}, '/a/b'>` resolves to the type `number`
  *
- * Note: Trailing slashes will add an extra '' key, which will probably be invalid:
- * `TypeOfPathField<{a: {b: number}}, '/a/b/'>` resolves to void
+ * Note: Trailing slashes should be avoided, as they will index the final type with an extra '' key, which will probably
+ * be invalid: `TypeOfPathField<{a: {b: number}}, '/a/b/'>` resolves to void
  */
 export type TypeOfPathField<T, Path extends string> = T extends object
     ? Path extends `/${infer SubPath}`

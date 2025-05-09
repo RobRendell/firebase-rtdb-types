@@ -13,7 +13,7 @@ import {
     runTransaction as firebaseRunTransaction,
     set as firebaseSet
 } from 'firebase/database';
-import {ChildOfDynamicStringKey, TypeOfPathField} from '@firebase-rtdb-types/common';
+import {ChildOfDynamicStringKey, TypeOfPathField} from 'better-firebase-rtdb-types-common';
 
 // Export wrappers for client RTDB Firebase functions which can infer the type of values accessed in the DB based on the
 // `Base` type declared when calling `getDatabase()` and the string paths used to access them.
