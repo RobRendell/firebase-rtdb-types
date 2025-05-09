@@ -1,26 +1,15 @@
 /**
- * If Key is the string '*', return the value addressed by T[string] or T[number] (including Arrays or ReadonlyArrays).
  * If Key is a key of T, return T[Key], else void (handles the special case where Javascript implicitly converts numbers
  * to strings, see first paragraph of:
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Property_Accessors#property_names)
  */
-type TypeOfStringOrNumberField<T, Key> = Key extends '*'
-    ? T extends ReadonlyArray<infer U>
-        ? U
-        : T extends Array<infer U>
-            ? U
-            : string extends keyof T
-                ? T[string]
-                : number extends keyof T
-                    ? T[number]
-                    : never
-    : Key extends keyof T
-        ? Required<T>[Key]
-        : Key extends `${number}`
-            ? T extends {[key: number]: unknown}
-                ? Required<T>[number]
-                : void
-            : void;
+type TypeOfStringOrNumberField<T, Key> = Key extends keyof T
+    ? Required<T>[Key]
+    : Key extends `${number}`
+        ? T extends {[key: number]: unknown}
+            ? Required<T>[number]
+            : void
+        : void;
 
 /**
  * Strips off any leading slash, then drills down into a type, treating Key as a slash separated list of keys or
@@ -60,3 +49,20 @@ export type ParentPath<Path extends string> = Path extends `${infer Parent}/${in
         ? ''
         : (SubPath extends `${string}/${string}` ? `${Parent}/${ParentPath<SubPath>}` : Parent)
     : '';
+
+type StringOrNumberOrKey<K> = string extends K ? `${string}` : number extends K ? `${number}` : K;
+
+/**
+ * Utility type to enumerate the keys of a type. Keys that result in a further object are augmented with `/${string} to
+ * allow further path elements, but are not recursively enumerated for efficiency reasons.
+ */
+export type ValidPath<T, Prefix extends string = ''> =
+    T extends object
+        ? {
+            [K in keyof T & (string | number)]: `${Prefix}${StringOrNumberOrKey<K>}` | (
+            T[K] extends object
+                ? `${Prefix}${StringOrNumberOrKey<K>}/${string}`
+                : never
+            );
+        }[keyof T & (string | number)]
+        : Prefix;
