@@ -1,1 +1,2 @@
-export * from './typedRtdbClient';
+export * from './typedRtdbClientWrappers';
+export * from './typedRtdbClientTypes';

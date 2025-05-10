@@ -5,12 +5,12 @@ the [Firebase Admin SDK's Realtime Database API](https://firebase.google.com/doc
 bindings are better than the ones that come standard with Firebase, validating the string paths used to access data and
 inferring the type of the data stored there.
 
-The core to using `better-firebase-rtdb-types-server` lies in you defining a TypeScript type that accurately represents
-the structure of your Firebase Realtime Database at the root level. This is used as the generic parameter for this
-package's exported `TypedDatabase` type.
+The core to using `better-firebase-rtdb-types-server` lies in you defining a base TypeScript type that accurately
+represents the structure of your Firebase Realtime Database at the root level. This is used as the generic parameter for
+this package's exported `TypedDatabase` type.
 
 Once you assign your Firebase `database` instance to a variable of type `TypedDatabase` with a generic parameter of your
-root type, subsequent accesses to the database using that variable will be strongly typed.
+base type, subsequent accesses to the database using that variable will be strongly typed.
 
 ## Installation
 

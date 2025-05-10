@@ -21,10 +21,6 @@ export interface TypedExistingDataSnapshot<Base, Path extends string> extends Ty
     key: string;
 }
 
-export type TypedThenableReference<Base, Path extends string, S = never> = TypedReference<Base, Path, S> &
-    {key: string} &
-    Pick<Promise<TypedReference<Base, Path, S>>, 'then' | 'catch'>;
-
 type PrimitiveType<S> = S extends string | number | boolean | null ? S : never
 
 type EventTypeValue = 'value';
@@ -110,6 +106,13 @@ export interface TypedQuery<Base, Path extends string, S = never> extends databa
     limitToLast(limit: number): TypedQuery<Base, Path, S>;
 }
 
+export type TypedThenableReference<Base, Path extends string, S = never> = TypedReference<Base, Path, S>
+    & Pick<Promise<TypedReference<Base, Path, S>>, 'then' | 'catch'>
+    & {
+        key: string
+        parent: TypedReference<Base, ParentPath<Path>>;
+    };
+
 interface TypedTransactionResult<Base, Path extends string> extends TransactionResult {
     snapshot: TypedDataSnapshot<Base, Path>;
 }
@@ -118,12 +121,12 @@ type ValidatedTypeReference<Base, Path extends string, S = never> = TypeOfPathFi
 
 export interface TypedReference<Base, Path extends string, S = never> extends Omit<database.Reference, keyof database.Query>, TypedQuery<Base, Path, S> {
     root: TypedReference<Base, ''>;
-    parent: TypedReference<Base, ParentPath<Path>>;
+    parent: Path extends '' ? null : TypedReference<Base, ParentPath<Path>>;
     child<ChildPath extends ValidPath<Base, Path>>(path: ChildPath): ValidatedTypeReference<Base, `${Path}/${ChildPath}`>;
     push(
         value?: ChildOfDynamicStringKey<TypeOfPathField<Base, Path>>,
         onComplete?: (a: Error | null) => void
-    ): TypedThenableReference<Base, Path, S>;
+    ): TypedThenableReference<Base, `${Path}/${string}`, S>;
     set(value: TypeOfPathField<Base, Path>, onComplete?: (a: Error | null) => void): Promise<void>;
     setWithPriority(
         newVal: TypeOfPathField<Base, Path>,
