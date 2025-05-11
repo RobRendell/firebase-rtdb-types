@@ -14,8 +14,9 @@ import {
 
 export * from './typedRtdbClientWrappers';
 export * from './typedRtdbClientTypes';
+export * from './queryBuilder';
 
-// Override the function signatures of the 'firebase/database' module.
+// Augment the function signatures of the 'firebase/database' module.
 declare module 'firebase/database' {
 
     export function getDatabase<Base>(app: FirebaseApp): TypedDatabase<Base>;

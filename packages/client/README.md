@@ -10,8 +10,8 @@ represents the structure of your Firebase Realtime Database at the root level. P
 type parameter to `getDatabase()` will cause Typescript to use this module's type definitions, resulting in the instance
 being of type `TypedDatabase`.
 
-Passing this `TypedDatabase` instance to calls to the modular Firebase functions will *usually* use this package's type
-overrides for the original firebase database modular functions, giving strong typing on your database accesses.
+Passing this `TypedDatabase` instance to calls to the modular Firebase functions will use this package's type overrides
+for the original firebase database modular functions, giving strong typing on your database accesses.
 
 ## IMPORTANT LIMITATION
 
@@ -77,6 +77,8 @@ type MyRootRtdbDataStructure = {
     }
 }
 
+// By setting a generic type parameter describing your database structure on the getDatabase call, the value returned
+// will be this package's `TypedDatabase`.
 const rtdb = getDatabase<MyRootRtdbDataStructure>(firebaseApp);
 
 async function demo() {
@@ -104,7 +106,7 @@ async function demo() {
         console.log(`Title: "${value.title}", Author: ${value.author}`);
     });
 
-    // Paths more than a single level deep aren't enumerated, but are validated via the return type.
+    // Path parameters more than a single level deep aren't enumerated, but are still validated via the return type.
     const badDeepRef = ref(rtdb, 'books/bZ3zFrG/published');
     // ❌ has type `never`
 
@@ -135,6 +137,40 @@ async function demo() {
 }
 
 ```
+
+### Query methods
+
+The approach the modular Firebase client `query` method takes
+to [sort and filter data](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data) is not
+well suited to static typing. The method takes a variable number of constraints as arguments, and the semantics of the
+constraint methods change depending on what occurs earlier in the list. For instance, a well-typed version of the
+constraint function `startAt(value)` should limit the type of the `value` parameter, but the valid type of this
+parameter changes, depending on the most recent orderBy* constraint prior to the `startAt`. If `startAt` occurs after a
+call to `orderByKey()` for example, then `value` have a type of `string`, but if it occurs after a call to
+`orderByPriority()` then it has a type of `string | number | null`.
+
+As a result, it is not possible to do type checking on code that uses the standard `query` method. Instead, this module
+exposes a builder approach to constructing queries, which is more amenable to strongly typing the constraints (as each
+function in the chain can return a new type, affecting all subsequent calls).
+
+```typescript
+import {queryBuilder} from 'better-firebase-rtdb-types-client';
+
+// Original code, using the modular `query` method, which is not strongly typed even with this module as a dependency.
+// const query = query(ref(rtdb, 'books'), orderByChild('year'), startAt(2015));
+
+const query = queryBuilder(ref(rtdb, 'books'))
+        // .with(orderByChild('published')) // ❌ Error: Type 'published' is not assignable to type 'title' | 'author' | 'year'
+        .with(orderByChild('year'))
+        // .with(startAt('abc')) // ❌ Error: Type 'string' is not assignable to type 'number'
+        .with(startAt(2015))
+        .toQuery();
+
+```
+
+This builder approach still tree-shakes well, as it uses the original modular orderBy* and start/end methods as
+parameters to the `with` method to build up its list of constraints. The builder code makes no reference to individual
+constraint methods internally, so any that are unused in your code will be omitted from your bundle.
 
 ### __type Variable
 
