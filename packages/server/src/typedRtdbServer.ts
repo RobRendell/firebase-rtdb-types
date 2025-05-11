@@ -122,7 +122,7 @@ type ValidatedTypeReference<Base, Path extends string, S = never> = TypeOfPathFi
 export interface TypedReference<Base, Path extends string, S = never> extends Omit<database.Reference, keyof database.Query>, TypedQuery<Base, Path, S> {
     root: TypedReference<Base, ''>;
     parent: Path extends '' ? null : TypedReference<Base, ParentPath<Path>>;
-    child<ChildPath extends ValidPath<Base, Path>>(path: ChildPath): ValidatedTypeReference<Base, `${Path}/${ChildPath}`>;
+    child<ChildPath extends ValidPath<TypeOfPathField<Base, Path>>>(path: ChildPath): ValidatedTypeReference<Base, `${Path}/${ChildPath}`>;
     push(
         value?: ChildOfDynamicStringKey<TypeOfPathField<Base, Path>>,
         onComplete?: (a: Error | null) => void

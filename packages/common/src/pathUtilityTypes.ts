@@ -56,13 +56,13 @@ type StringOrNumberOrKey<K> = string extends K ? `${string}` : number extends K 
  * Utility type to enumerate the keys of a type. Keys that result in a further object are augmented with `/${string} to
  * allow further path elements, but are not recursively enumerated for efficiency reasons.
  */
-export type ValidPath<T, Prefix extends string = ''> =
+export type ValidPath<T> =
     T extends object
         ? {
-            [K in keyof T & (string | number)]: `${Prefix}${StringOrNumberOrKey<K>}` | (
+            [K in keyof T & (string | number)]: `${StringOrNumberOrKey<K>}` | (
             T[K] extends object
-                ? `${Prefix}${StringOrNumberOrKey<K>}/${string}`
+                ? `${StringOrNumberOrKey<K>}/${string}`
                 : never
             );
         }[keyof T & (string | number)]
-        : Prefix;
+        : never;
