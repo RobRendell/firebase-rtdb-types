@@ -7,6 +7,21 @@
   "author": "Rob Rendell",
   "repository": "https://github.com/RobRendell/firebase-rtdb-types.git",
   "license": "MIT",
+  "keywords": [
+    "unofficial",
+    "firebase",
+    "realtime database",
+    "rtdb",
+    "typescript",
+    "types",
+    "typings",
+    "strong-typing",
+    "type-safe",
+    "server",
+    "admin",
+    "firebase-admin",
+    "functions"
+  ],
   "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc --build && tsc-alias"
